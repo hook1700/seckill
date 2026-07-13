@@ -1,0 +1,4 @@
+redis_addr: "redis:6379"
+mysql_dsn: "root:root123@tcp(mysql:3306)/seckill?charset=utf8mb4&parseTime=true"
+kafka_brokers:
+  - "kafka:9092"

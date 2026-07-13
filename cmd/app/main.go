@@ -15,15 +15,15 @@ func main() {
 
 	// 2. 初始化依赖
 	repo.InitRedis(cfg.RedisAddr)
-	repo.InitKafka(cfg.KafkaBrokers)
-	repo.InitMySQL(cfg.MySQLDSN)
+	//repo.InitKafka(cfg.KafkaBrokers)
+	//repo.InitMySQL(cfg.MySQLDSN)
 
 	// 3. 启动 Gin（压测时切 release）
 	r := gin.Default()
 	api.RegisterRouter(r)
 
 	// 4. 启动 Kafka 消费（异步落单）
-	go api.StartOrderConsumer()
+	//go api.StartOrderConsumer()
 
 	log.Fatal(r.Run(":8080"))
 }

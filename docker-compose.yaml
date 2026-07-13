@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: seckill_redis
+    ports: [ "6379:6379" ]
+    command: redis-server --appendonly yes --maxmemory 2gb --maxmemory-policy allkeys-lru
+    sysctls:
+      net.core.somaxconn: '65535'
+
+  app:
+    build: .
+    container_name: seckill_app
+    ports: [ "8080:8080" ]
+    depends_on: [ redis, mysql, kafka ]
+    environment:
+      GOMAXPROCS: 3
+      REDIS_ADDR: redis:6379
+      MYSQL_DSN: root:root123@tcp(mysql:3306)/seckill?charset=utf8mb4&parseTime=True
+      KAFKA_BROKERS: kafka:9092
+
+networks:
+  default:
+    name: seckill_net
