@@ -24,7 +24,7 @@ return 1
 func InitRedis(addr string) {
 	rdb = redis.NewClient(&redis.Options{
 		Addr:     addr,
-		PoolSize: 100,
+		PoolSize: 20,
 	})
 
 	ctx := context.Background()
