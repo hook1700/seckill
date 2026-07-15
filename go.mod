@@ -3,9 +3,9 @@ module seckill
 go 1.26.1
 
 require (
-	github.com/gin-gonic/gin v1.12.0
-	github.com/redis/go-redis/v9 v9.21.0
-	gopkg.in/yaml.v3 v3.0.1
+	github.com/gin-gonic/gin v1.9.1
+        github.com/redis/go-redis/v9 v9.3.0
+        github.com/segmentio/kafka-go v0.4.47
 )
 
 require (

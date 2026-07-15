@@ -10,81 +10,18 @@ services:
       --maxmemory 512mb
       --maxmemory-policy allkeys-lru
       --save ""
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 512M
     ports:
       - "6379:6379"
-
-  mysql:
-    image: mysql:8.0
-    container_name: seckill_mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root123
-      MYSQL_DATABASE: seckill
-    volumes:
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
-    command:
-      --character-set-server=utf8mb4
-      --collation-server=utf8mb4_unicode_ci
-      --innodb_buffer_pool_size=256M
-      --max_connections=50
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 512M
-    ports:
-      - "3306:3306"
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    container_name: seckill_zk
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-    deploy:
-      resources:
-        limits:
-          cpus: "0.3"
-          memory: 256M
-
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    container_name: seckill_kafka
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_HEAP_OPTS: "-Xms128M -Xmx256M"
-    deploy:
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 384M
-    ports:
-      - "9092:9092"
+    restart: unless-stopped
 
   app:
     build: .
     container_name: seckill_app
+    ports:
+      - "8080:8080"
     depends_on:
       - redis
-      - mysql
-      - kafka
     environment:
       GOMAXPROCS: 1
       REDIS_ADDR: redis:6379
-      MYSQL_DSN: root:root123@tcp(mysql:3306)/seckill?charset=utf8mb4&parseTime=true
-      KAFKA_BROKERS: kafka:9092
-    deploy:
-      resources:
-        limits:
-          cpus: "1"
-          memory: 512M
-    ports:
-      - "8080:8080"
+    restart: unless-stopped
