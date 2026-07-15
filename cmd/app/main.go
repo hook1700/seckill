@@ -5,7 +5,6 @@ import (
 	"log"
 	"runtime"
 	"seckill/config"
-
 	"seckill/internal/mq"
 	"seckill/internal/repo"
 

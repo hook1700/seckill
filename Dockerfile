@@ -8,7 +8,7 @@ WORKDIR /app
 COPY go.mod go.sum* ./
 COPY cmd/ cmd/
 COPY internal/ internal/
-COPY config/config.yaml ./config.yaml
+COPY config/config.yaml ./config/config.yaml
 
 RUN go mod tidy
 RUN go mod download
