@@ -39,8 +39,8 @@ func Load() *Config {
 	v := viper.New()
 	v.SetConfigName("config")
 	v.SetConfigType("yaml")
-	v.AddConfigPath(".")
-	v.AddConfigPath("/app/")
+	v.AddConfigPath(".")        // 容器根目录
+	v.AddConfigPath("./config") // 可选
 
 	if err := v.ReadInConfig(); err != nil {
 		log.Fatalf("read config failed: %v", err)

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"seckill/config"
 
-	"seckill/internal/config"
 	"seckill/internal/mq"
 	"seckill/internal/repo"
 
