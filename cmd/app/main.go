@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"os"
 	"seckill/internal/api"
 	"seckill/internal/repo"
 
@@ -9,10 +9,13 @@ import (
 )
 
 func main() {
-	repo.InitRedis("localhost:6379")
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "redis:6379" // 兜底
+	}
 
+	repo.InitRedis(redisAddr)
 	r := gin.Default()
 	api.RegisterRouter(r)
-
-	log.Fatal(r.Run(":8080"))
+	r.Run(":8080")
 }
