@@ -1,9 +1,9 @@
 package api
 
-import (
-	"github.com/gin-gonic/gin"
-)
+import "github.com/gin-gonic/gin"
 
-func RegisterRouter(r *gin.Engine) {
+func RegisterRouter() *gin.Engine {
+	r := gin.Default()
 	r.GET("/seckill", SeckillHandler)
+	return r
 }

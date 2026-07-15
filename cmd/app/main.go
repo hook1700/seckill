@@ -1,21 +1,31 @@
 package main
 
 import (
-	"os"
-	"seckill/internal/api"
+	"fmt"
+	"log"
+	"runtime"
+
+	"seckill/internal/config"
+	"seckill/internal/mq"
 	"seckill/internal/repo"
 
-	"github.com/gin-gonic/gin"
+	"seckill/internal/api"
 )
 
 func main() {
-	redisAddr := os.Getenv("REDIS_ADDR")
-	if redisAddr == "" {
-		redisAddr = "redis:6379" // 兜底
+	cfg := config.Load()
+
+	if cfg.App.GOMAXPROCS > 0 {
+		runtime.GOMAXPROCS(cfg.App.GOMAXPROCS)
 	}
 
-	repo.InitRedis(redisAddr)
-	r := gin.Default()
-	api.RegisterRouter(r)
-	r.Run(":8080")
+	repo.InitRedis(cfg.Redis.Addr, cfg.Redis.PoolSize)
+	repo.InitMySQL(cfg.MySQL.DSN, cfg.MySQL.MaxOpenConns, cfg.MySQL.MaxIdleConns)
+	repo.InitKafka(cfg.Kafka.Brokers)
+
+	go mq.StartConsumer(cfg.Kafka.Brokers, cfg.Kafka.Topic, cfg.Kafka.ConsumerGroup)
+
+	r := api.RegisterRouter()
+	log.Printf("seckill server start at :%d", cfg.App.Port)
+	log.Fatal(r.Run(fmt.Sprintf(":%d", cfg.App.Port)))
 }

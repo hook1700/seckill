@@ -1,4 +1,17 @@
-redis_addr: "redis:6379"
-mysql_dsn: "root:root123@tcp(mysql:3306)/seckill?charset=utf8mb4&parseTime=true"
-kafka_brokers:
-  - "kafka:9092"
+app:
+  port: 8080
+  gomaxprocs: 1
+
+redis:
+  addr: redis:6379
+  pool_size: 20
+
+mysql:
+  dsn: root:root123@tcp(mysql:3306)/seckill?charset=utf8mb4&parseTime=true
+  max_open_conns: 10
+  max_idle_conns: 2
+
+kafka:
+  brokers: kafka:9092
+  topic: seckill_order
+  consumer_group: seckill-group

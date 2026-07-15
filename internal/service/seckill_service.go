@@ -7,17 +7,16 @@ import (
 )
 
 var (
-	ErrSoldOut  = errors.New("sold out")
-	ErrRepeated = errors.New("already seckilled")
+	ErrSoldOut = errors.New("sold out")
 )
 
 func DoSeckill(ctx context.Context, userID, activityID string) error {
 	success, err := repo.SeckillDecr(ctx, userID, activityID)
 	if err != nil {
-		return err // Redis 异常
+		return err
 	}
 	if !success {
-		return ErrSoldOut // 库存不足或重复
+		return ErrSoldOut
 	}
-	return nil
+	return repo.SendOrderEvent(ctx, userID, activityID)
 }

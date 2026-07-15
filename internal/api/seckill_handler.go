@@ -16,8 +16,7 @@ func SeckillHandler(c *gin.Context) {
 		return
 	}
 
-	err := service.DoSeckill(c.Request.Context(), userID, activityID)
-	if err != nil {
+	if err := service.DoSeckill(c.Request.Context(), userID, activityID); err != nil {
 		if err == service.ErrSoldOut {
 			c.JSON(http.StatusOK, gin.H{"msg": "sold out"})
 		} else {
@@ -26,5 +25,5 @@ func SeckillHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"msg": "success"})
+	c.JSON(http.StatusOK, gin.H{"msg": "queued"})
 }
