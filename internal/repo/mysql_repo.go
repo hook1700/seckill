@@ -12,19 +12,23 @@ var db *gorm.DB
 
 func InitMySQL(dsn string, maxOpen, maxIdle int) {
 	var err error
-	for i := 0; i < 10; i++ {
+
+	// ✅ 关键：等待 MySQL 就绪
+	for i := 1; i <= 15; i++ {
 		db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		if err == nil {
 			sqlDB, _ := db.DB()
 			sqlDB.SetMaxOpenConns(maxOpen)
 			sqlDB.SetMaxIdleConns(maxIdle)
-			log.Println("mysql connected")
+			log.Println("✅ mysql connected")
 			return
 		}
-		log.Printf("mysql not ready, retry %d: %v", i+1, err)
+
+		log.Printf("⏳ mysql not ready, retry %d/%d: %v", i, 15, err)
 		time.Sleep(2 * time.Second)
 	}
-	panic("mysql connect failed after retries")
+
+	panic("❌ mysql connect failed after retries")
 }
 
 type SeckillOrder struct {
