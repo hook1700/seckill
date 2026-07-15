@@ -2,21 +2,22 @@ package service
 
 import (
 	"context"
+	"errors"
 	"seckill/internal/repo"
 )
 
-func DoSeckill(ctx context.Context, userID, activityID string) (int64, error) {
-	// 1. Redis 原子扣减（Lua）
+var (
+	ErrSoldOut  = errors.New("sold out")
+	ErrRepeated = errors.New("already seckilled")
+)
+
+func DoSeckill(ctx context.Context, userID, activityID string) error {
 	success, err := repo.SeckillDecr(ctx, userID, activityID)
-	if err != nil || !success {
-		return -1, err
-	}
-
-	// 2. 发送 Kafka（异步落单）
-	orderID, err := repo.SendOrderEvent(ctx, userID, activityID)
 	if err != nil {
-		return -1, err
+		return err // Redis 异常
 	}
-
-	return orderID, nil
+	if !success {
+		return ErrSoldOut // 库存不足或重复
+	}
+	return nil
 }

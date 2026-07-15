@@ -16,16 +16,15 @@ func SeckillHandler(c *gin.Context) {
 		return
 	}
 
-	result, err := service.DoSeckill(c.Request.Context(), userID, activityID)
+	err := service.DoSeckill(c.Request.Context(), userID, activityID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		if err == service.ErrSoldOut {
+			c.JSON(http.StatusOK, gin.H{"msg": "sold out"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+		}
 		return
 	}
 
-	if result == -1 {
-		c.JSON(http.StatusOK, gin.H{"msg": "sold out"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"msg": "queued", "order_id": result})
+	c.JSON(http.StatusOK, gin.H{"msg": "success"})
 }

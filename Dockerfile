@@ -1,4 +1,4 @@
-FROM golang:1.22-alpine AS builder
+FROM golang:1.26-alpine AS builder
 
 # ✅ 国内必加
 ENV GOPROXY=https://goproxy.cn,direct
