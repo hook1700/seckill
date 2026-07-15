@@ -8,7 +8,66 @@
           <option name="hasMoreRemoteMessages" value="false" />
           <option name="id" value="019f5a9c961d76d796bb61d9082659e4" />
           <option name="nextBeforeCursor" value="" />
-          <option name="updateTime" value="1783931639325" />
+          <option name="title" value="Go模块版本更新机制" />
+          <option name="turns">
+            <list>
+              <Turn>
+                <option name="agent" value="" />
+                <option name="aguiRpcList">
+                  <list>
+                    <option value="{&quot;type&quot;:&quot;RUN_STARTED&quot;,&quot;timestamp&quot;:1784096898,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f64763b657083beb659e839bee9b1&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;},&quot;threadId&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;runId&quot;:&quot;019f64763b657083beb659e839bee9b1&quot;}" />
+                    <option value="{&quot;type&quot;:&quot;RUN_ERROR&quot;,&quot;timestamp&quot;:1784096898,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f64763b657083beb659e839bee9b1&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;tip_option&quot;:{&quot;type&quot;:&quot;markdown&quot;,&quot;level&quot;:&quot;error&quot;,&quot;content&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}},&quot;message&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}" />
+                  </list>
+                </option>
+                <option name="answer" value="" />
+                <option name="chatMode" value="AGENT" />
+                <option name="codeReferences">
+                  <list>
+                    <CodeReferencesBean>
+                      <option name="content" value="" />
+                      <option name="filename" value="go.mod" />
+                      <option name="language" value="vgo" />
+                      <option name="range">
+                        <CommitRange>
+                          <option name="dontDisplayRange" value="true" />
+                          <option name="dontSelectByRange" value="true" />
+                          <option name="end">
+                            <Position />
+                          </option>
+                          <option name="start">
+                            <Position />
+                          </option>
+                        </CommitRange>
+                      </option>
+                      <option name="type" value="full_file" />
+                      <option name="url" value="file:///E:/myproject/seckill/go.mod" />
+                    </CodeReferencesBean>
+                  </list>
+                </option>
+                <option name="command" value="normal" />
+                <option name="conversationId" value="019f5a9c961d76d796bb61d9082659e4" />
+                <option name="historyDocumentMap">
+                  <map>
+                    <entry key="file:///E:/myproject/seckill/go.mod" value="module seckill&#10;&#10;go 1.25.0&#10;&#10;require (&#10;&#9;github.com/gin-gonic/gin v1.9.1&#10;&#9;github.com/redis/go-redis/v9 v9.3.0&#10;&#9;gopkg.in/yaml.v3 v3.0.1&#10;)&#10;&#10;require (&#10;&#9;github.com/bytedance/gopkg v0.1.3 // indirect&#10;&#9;github.com/bytedance/sonic v1.15.0 // indirect&#10;&#9;github.com/bytedance/sonic/loader v0.5.0 // indirect&#10;&#9;github.com/cespare/xxhash/v2 v2.3.0 // indirect&#10;&#9;github.com/cloudwego/base64x v0.1.6 // indirect&#10;&#9;github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect&#10;&#9;github.com/gabriel-vasile/mimetype v1.4.12 // indirect&#10;&#9;github.com/gin-contrib/sse v1.1.0 // indirect&#10;&#9;github.com/go-playground/locales v0.14.1 // indirect&#10;&#9;github.com/go-playground/universal-translator v0.18.1 // indirect&#10;&#9;github.com/go-playground/validator/v10 v10.30.1 // indirect&#10;&#9;github.com/goccy/go-json v0.10.5 // indirect&#10;&#9;github.com/json-iterator/go v1.1.12 // indirect&#10;&#9;github.com/klauspost/cpuid/v2 v2.3.0 // indirect&#10;&#9;github.com/kr/pretty v0.3.1 // indirect&#10;&#9;github.com/leodido/go-urn v1.4.0 // indirect&#10;&#9;github.com/mattn/go-isatty v0.0.20 // indirect&#10;&#9;github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect&#10;&#9;github.com/modern-go/reflect2 v1.0.2 // indirect&#10;&#9;github.com/pelletier/go-toml/v2 v2.2.4 // indirect&#10;&#9;github.com/rogpeppe/go-internal v1.10.0 // indirect&#10;&#9;github.com/stretchr/testify v1.11.1 // indirect&#10;&#9;github.com/twitchyliquid64/golang-asm v0.15.1 // indirect&#10;&#9;github.com/ugorji/go/codec v1.3.1 // indirect&#10;&#9;golang.org/x/arch v0.22.0 // indirect&#10;&#9;golang.org/x/crypto v0.48.0 // indirect&#10;&#9;golang.org/x/net v0.51.0 // indirect&#10;&#9;golang.org/x/sys v0.41.0 // indirect&#10;&#9;golang.org/x/text v0.34.0 // indirect&#10;&#9;google.golang.org/protobuf v1.36.10 // indirect&#10;&#9;gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect&#10;)&#10;" />
+                  </map>
+                </option>
+                <option name="messageId" value="019f64763b657083beb659e839bee9b1" />
+                <option name="model" value="default" />
+                <option name="protocol" value="ag-ui" />
+                <option name="question" value="为什么我每次tl nlw grwb 都会更新tlozmt版本标签" />
+                <option name="rating" value="UNRATED" />
+                <option name="referenceBeans">
+                  <list />
+                </option>
+                <option name="requestAt" value="2026-07-15 14:28:17" />
+                <option name="status" value="SUCCESS" />
+                <option name="variables">
+                  <list />
+                </option>
+              </Turn>
+            </list>
+          </option>
+          <option name="updateTime" value="1784096898269" />
         </Conversation>
       </list>
     </option>
