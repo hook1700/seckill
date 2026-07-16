@@ -16,12 +16,15 @@ services:
     image: bitnami/kafka:3.6
     container_name: seckill_kafka
     depends_on: [ zookeeper ]
+
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
     deploy:
       resources:
         limits:
