@@ -6,6 +6,8 @@ services:
     container_name: seckill_zk
     environment:
       ALLOW_ANONYMOUS_LOGIN: yes
+      # ✅ Zookeeper 也限制 JVM
+      ZOO_HEAP_SIZE: 128M
     deploy:
       resources:
         limits:
@@ -32,6 +34,11 @@ services:
       KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
+
+      # ✅ 关键：限制 JVM 堆内存（2 核 2G 机器必设）
+      KAFKA_HEAP_OPTS: "-Xms128M -Xmx256M"
+      # ✅ 减少 Kafka 内存开销
+      KAFKA_JVM_PERFORMANCE_OPTS: "-XX:+UseG1GC -XX:MaxGCPauseMillis=20"
 
     deploy:
       resources:
