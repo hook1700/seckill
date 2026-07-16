@@ -13,6 +13,8 @@ import (
 )
 
 func StartConsumer(brokers, topic, groupID string) {
+
+	waitForKafka(brokers)
 	// 等待 Kafka 可用
 	var reader *kafka.Reader
 	for i := 1; i <= 30; i++ {
@@ -59,4 +61,22 @@ func StartConsumer(brokers, topic, groupID string) {
 			log.Printf("✅ order saved: user=%s activity=%s", event.UserID, event.ActivityID)
 		}
 	}
+}
+
+func waitForKafka(brokers string) {
+	for i := 1; i <= 40; i++ {
+		conn, err := kafka.Dial("tcp", brokers)
+		if err == nil {
+			// 再试一次 Metadata，确保 Broker 能响应
+			_, err = conn.Controller()
+			conn.Close()
+			if err == nil {
+				log.Println("✅ kafka is fully ready")
+				return
+			}
+		}
+		log.Printf("⏳ kafka not fully ready, retry %d/40: %v", i, err)
+		time.Sleep(2 * time.Second)
+	}
+	log.Fatal("❌ kafka not ready after retries")
 }
