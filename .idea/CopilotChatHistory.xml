@@ -8,6 +8,8 @@
           <option name="hasMoreRemoteMessages" value="false" />
           <option name="id" value="019f5a9c961d76d796bb61d9082659e4" />
           <option name="nextBeforeCursor" value="" />
+          <option name="remoteOldestRequestAt" value="2026-07-15 14:28:18" />
+          <option name="storageSource" value="REMOTE" />
           <option name="title" value="Go模块版本更新机制" />
           <option name="turns">
             <list>
@@ -65,9 +67,225 @@
                   <list />
                 </option>
               </Turn>
+              <Turn>
+                <option name="agent" value="" />
+                <option name="aguiRpcList">
+                  <list>
+                    <option value="{&quot;type&quot;:&quot;RUN_STARTED&quot;,&quot;timestamp&quot;:1784255466,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f6de9c9ca71ee9291d75aec443160&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;},&quot;threadId&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;runId&quot;:&quot;019f6de9c9ca71ee9291d75aec443160&quot;}" />
+                    <option value="{&quot;type&quot;:&quot;RUN_ERROR&quot;,&quot;timestamp&quot;:1784255466,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f6de9c9ca71ee9291d75aec443160&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;tip_option&quot;:{&quot;type&quot;:&quot;markdown&quot;,&quot;level&quot;:&quot;error&quot;,&quot;content&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}},&quot;message&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}" />
+                  </list>
+                </option>
+                <option name="answer" value="" />
+                <option name="chatMode" value="AGENT" />
+                <option name="codeReferences">
+                  <list>
+                    <CodeReferencesBean>
+                      <option name="content" value="" />
+                      <option name="filename" value="操作.md" />
+                      <option name="language" value="markdown" />
+                      <option name="range">
+                        <CommitRange>
+                          <option name="dontDisplayRange" value="true" />
+                          <option name="dontSelectByRange" value="true" />
+                          <option name="end">
+                            <Position />
+                          </option>
+                          <option name="start">
+                            <Position />
+                          </option>
+                        </CommitRange>
+                      </option>
+                      <option name="type" value="full_file" />
+                      <option name="url" value="file:///E:/myproject/seckill/操作.md" />
+                    </CodeReferencesBean>
+                  </list>
+                </option>
+                <option name="command" value="normal" />
+                <option name="conversationId" value="019f5a9c961d76d796bb61d9082659e4" />
+                <option name="historyDocumentMap">
+                  <map>
+                    <entry key="file:///E:/myproject/seckill/操作.md" value="# 数据流&#10;┌──────────────┐&#10;│   Client     │&#10;└──────┬───────┘&#10;│ HTTP&#10;┌──────▼───────┐&#10;│  Gin (Go)    │&#10;│  API Server  │&#10;└──┬────────┬──┘&#10;│        │&#10;LPUSH │        │ Producer&#10;│        ▼&#10;┌──────┴──┐  ┌──────────────┐&#10;│  Redis  │  │   Kafka      │&#10;│  Stock  │  │ seckill_order│&#10;└─────────┘  └──────┬───────┘&#10;│ Consumer Group&#10;│ (seckill-group)&#10;▼&#10;┌──────────────┐&#10;│  MySQL       │&#10;│  orders 表   │&#10;└──────────────┘&#10;&#10;# 启动方式&#10;## 构建并启动所有服务&#10;sudo docker compose up -d --build&#10;&#10;## 查看运行状态&#10;sudo docker ps&#10;&#10;## 查看日志&#10;sudo docker logs -f seckill_app&#10;&#10;# Kafka 配置与 Topic 管理&#10;&#10;## Topic 创建&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--create --topic seckill_order \&#10;--partitions 1 \&#10;--replication-factor 1&#10;&#10;## 查看 Topic 列表&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--list&#10;&#10;## Consumer Group&#10;docker exec -it seckill_kafka kafka-consumer-groups \&#10;--bootstrap-server kafka:9092 \&#10;--list&#10;&#10;# wrk 压测方案&#10;## 安装&#10;sudo apt update&#10;sudo apt install -y wrk&#10;&#10;## 执行压测&#10;wrk -t4 -c200 -d30s \&#10;-s scripts/seckill.lua \&#10;http://localhost:8080/seckill&#10;参数&#10;-t4&#10;4 个线程&#10;-c200&#10;200 个并发连接&#10;-d30s&#10;持续 30 秒&#10;&#10;&#10;## 指标&#9;目标&#10;QPS&#9;≥ 1000&#10;平均延迟&#9;&lt; 20ms&#10;P99 延迟&#9;&lt; 50ms&#10;错误率&#9;0%&#10;&#10;五、遇到的问题 &amp; 排查过程&#10;问题 1：Kafka 容器反复退出（Exit Code 137）&#10;现象&#10;docker ps -a | grep kafka&#10;# Exited (137) 5 minutes ago&#10;排查过程&#10;查看容器退出状态：&#10;docker inspect seckill_kafka --format='{{.State.OOMKilled}}'&#10;# 输出 true&#10;查看系统内存：&#10;free -m&#10;查看内核日志：&#10;dmesg -T | grep -i 'oom\|killed process'&#10;根因&#10;Kafka（Confluent Platform）默认 JVM 堆内存需求大&#10;云服务器内存不足（1~2GB）&#10;同时存在 MySQL + Redis + Kafka + ZooKeeper&#10;内存超限，被 Linux OOM Killer 强制终止&#10;解决方案&#10;限制 Kafka JVM 内存：&#10;environment:&#10;KAFKA_HEAP_OPTS: &quot;-Xms128M -Xmx384M&quot;&#10;KAFKA_JVM_PERFORMANCE_OPTS: &quot;-XX:MetaspaceSize=48m -XX:+UseG1GC&quot;&#10;限制 ZooKeeper 内存：&#10;environment:&#10;JVMFLAGS: &quot;-Xms64M -Xmx128M&quot;&#10;减少 Kafka 网络/IO 线程数：&#10;KAFKA_NUM_NETWORK_THREADS: 2&#10;KAFKA_NUM_IO_THREADS: 2&#10;问题 2：kafka-console-consumer 没有输出&#10;现象&#10;docker exec -it seckill_kafka kafka-console-consumer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order \&#10;--from-beginning&#10;# 无任何输出&#10;排查过程&#10;确认 Topic 是否存在：&#10;kafka-topics --list&#10;# 输出包含 seckill_order ✅&#10;查看 Consumer Group：&#10;kafka-consumer-groups --list&#10;# 发现 seckill-group 已存在&#10;查看 Kafka 日志：&#10;docker logs seckill_kafka --tail 50&#10;# 发现 seckill-group 已稳定消费&#10;根因&#10;Go 服务（seckill-group）已经消费完所有消息&#10;console-consumer 使用不同的 group.id，但消息已被消费且未保留&#10;Kafka 日志保留策略可能已清理旧消息&#10;解决方案&#10;使用 --from-beginning+ 新的 consumer group：&#10;kafka-console-consumer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order \&#10;--from-beginning \&#10;--group test-group-$(date +%s)&#10;验证 Kafka 可正常收发：&#10;# 生产者&#10;kafka-console-producer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order&#10;# 输入测试消息&#10;问题 3：docker exec 报错 &quot;container is not running&quot;&#10;现象&#10;Error response from daemon: container xxx is not running&#10;根因&#10;Kafka 容器已停止&#10;但历史日志仍存在，造成&quot;Kafka 还在运行&quot;的错觉&#10;解决方案&#10;检查容器状态：&#10;docker ps -a | grep kafka&#10;查看崩溃日志：&#10;docker logs seckill_kafka --tail 100&#10;重启服务：&#10;docker compose down&#10;docker compose up -d&#10;问题 4：Docker 容器名称冲突&#10;现象&#10;docker compose up&#10;# Error: Conflict. The container name &quot;seckill_kafka&quot; is already in use&#10;解决方案&#10;# 方式一：停止并删除旧容器&#10;docker compose down&#10;&#10;# 方式二：删除指定容器&#10;docker rm -f seckill_kafka&#10;六、服务运维 &amp; 二次部署&#10;6.1 查看各服务状态&#10;# 所有容器&#10;docker ps -a&#10;&#10;# 单独查看&#10;docker ps | grep kafka&#10;docker ps | grep redis&#10;docker ps | grep mysql&#10;docker ps | grep app&#10;6.2 完全重建（开发环境）&#10;cd /home/way/seckill&#10;sudo docker compose down -v       # 删除容器 + 数据卷&#10;sudo docker compose up -d --build # 重新构建启动&#10;⚠️ -v会清除 MySQL / Redis / Kafka 数据&#10;6.3 保留数据重建（推荐）&#10;sudo docker compose down         # 仅删除容器&#10;sudo docker compose up -d --build&#10;✅ MySQL 数据保留&#10;✅ Redis 数据保留&#10;✅ Kafka offset 保留&#10;6.4 单独更新后端服务（高频操作）&#10;# 仅重新构建 app 服务&#10;sudo docker compose build app&#10;&#10;# 仅重启 app 服务（不重启 MySQL / Redis / Kafka）&#10;sudo docker compose up -d --no-deps app&#10;✅ 零影响更新后端代码&#10;✅ 其他服务保持运行&#10;6.5 滚动更新（零停机）&#10;# 启动新版本（不停止旧版本）&#10;docker compose up -d --scale app=2 --no-recreate&#10;&#10;# 确认新版本正常后，停止旧版本&#10;docker stop seckill_app_old&#10;docker rm seckill_app_old&#10;&#10;# 恢复原配置&#10;docker compose up -d --scale app=1&#10;6.6 迁移到新机器&#10;# 原机器：打包项目&#10;cd /home/way&#10;tar czf seckill.tar.gz seckill/&#10;&#10;# 传输到新机器&#10;scp seckill.tar.gz user@new-host:/home/user/&#10;&#10;# 新机器：解压并启动&#10;cd /home/user&#10;tar xzf seckill.tar.gz&#10;cd seckill&#10;sudo docker compose up -d&#10;七、日常运维命令速查表&#10;7.1 Redis&#10;# 连接 Redis&#10;docker exec -it seckill_redis redis-cli&#10;&#10;# 查看队列长度&#10;LLEN seckill:order:queue&#10;&#10;# 查看库存&#10;GET stock:goods:1&#10;&#10;# 查看内存使用&#10;INFO memory&#10;7.2 MySQL&#10;# 连接 MySQL&#10;docker exec -it seckill_mysql mysql -uroot -proot123 seckill&#10;&#10;# 查看订单数&#10;SELECT COUNT(*) FROM orders;&#10;&#10;# 查看连接数&#10;SHOW STATUS LIKE 'Threads_connected';&#10;&#10;# 查看慢查询&#10;SHOW VARIABLES LIKE 'slow_query_log';&#10;7.3 Kafka&#10;# 查看 Topic 详情&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--describe --topic seckill_order&#10;&#10;# 查看 Consumer Group 消费进度&#10;docker exec -it seckill_kafka kafka-consumer-groups \&#10;--bootstrap-server kafka:9092 \&#10;--describe --group seckill-group&#10;&#10;# 查看 Broker 版本&#10;docker exec -it seckill_kafka kafka-broker-api-versions \&#10;--bootstrap-server kafka:9092&#10;7.4 Go 服务&#10;# 查看日志&#10;docker logs -f seckill_app --tail 100&#10;&#10;# 查看资源占用&#10;docker stats seckill_app&#10;&#10;# 进入容器调试&#10;docker exec -it seckill_app sh" />
+                  </map>
+                </option>
+                <option name="messageId" value="019f6de9c9ca71ee9291d75aec443160" />
+                <option name="model" value="hy3" />
+                <option name="protocol" value="ag-ui" />
+                <option name="question" value="整理下这个nw文档" />
+                <option name="rating" value="UNRATED" />
+                <option name="referenceBeans">
+                  <list />
+                </option>
+                <option name="requestAt" value="2026-07-17 10:31:05" />
+                <option name="status" value="SUCCESS" />
+                <option name="variables">
+                  <list />
+                </option>
+              </Turn>
+              <Turn>
+                <option name="agent" value="" />
+                <option name="aguiRpcList">
+                  <list>
+                    <option value="{&quot;type&quot;:&quot;RUN_STARTED&quot;,&quot;timestamp&quot;:1784255474,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f6de9ea7d7b16a83731377a3f3a13&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;},&quot;threadId&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;runId&quot;:&quot;019f6de9ea7d7b16a83731377a3f3a13&quot;}" />
+                    <option value="{&quot;type&quot;:&quot;RUN_ERROR&quot;,&quot;timestamp&quot;:1784255474,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f6de9ea7d7b16a83731377a3f3a13&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;tip_option&quot;:{&quot;type&quot;:&quot;markdown&quot;,&quot;level&quot;:&quot;error&quot;,&quot;content&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}},&quot;message&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}" />
+                  </list>
+                </option>
+                <option name="answer" value="" />
+                <option name="chatMode" value="AGENT" />
+                <option name="codeReferences">
+                  <list>
+                    <CodeReferencesBean>
+                      <option name="content" value="" />
+                      <option name="filename" value="操作.md" />
+                      <option name="language" value="markdown" />
+                      <option name="range">
+                        <CommitRange>
+                          <option name="dontDisplayRange" value="true" />
+                          <option name="dontSelectByRange" value="true" />
+                          <option name="end">
+                            <Position />
+                          </option>
+                          <option name="start">
+                            <Position />
+                          </option>
+                        </CommitRange>
+                      </option>
+                      <option name="type" value="full_file" />
+                      <option name="url" value="file:///E:/myproject/seckill/操作.md" />
+                    </CodeReferencesBean>
+                  </list>
+                </option>
+                <option name="command" value="normal" />
+                <option name="conversationId" value="019f5a9c961d76d796bb61d9082659e4" />
+                <option name="historyDocumentMap">
+                  <map>
+                    <entry key="file:///E:/myproject/seckill/操作.md" value="# 数据流&#10;┌──────────────┐&#10;│   Client     │&#10;└──────┬───────┘&#10;│ HTTP&#10;┌──────▼───────┐&#10;│  Gin (Go)    │&#10;│  API Server  │&#10;└──┬────────┬──┘&#10;│        │&#10;LPUSH │        │ Producer&#10;│        ▼&#10;┌──────┴──┐  ┌──────────────┐&#10;│  Redis  │  │   Kafka      │&#10;│  Stock  │  │ seckill_order│&#10;└─────────┘  └──────┬───────┘&#10;│ Consumer Group&#10;│ (seckill-group)&#10;▼&#10;┌──────────────┐&#10;│  MySQL       │&#10;│  orders 表   │&#10;└──────────────┘&#10;&#10;# 启动方式&#10;## 构建并启动所有服务&#10;sudo docker compose up -d --build&#10;&#10;## 查看运行状态&#10;sudo docker ps&#10;&#10;## 查看日志&#10;sudo docker logs -f seckill_app&#10;&#10;# Kafka 配置与 Topic 管理&#10;&#10;## Topic 创建&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--create --topic seckill_order \&#10;--partitions 1 \&#10;--replication-factor 1&#10;&#10;## 查看 Topic 列表&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--list&#10;&#10;## Consumer Group&#10;docker exec -it seckill_kafka kafka-consumer-groups \&#10;--bootstrap-server kafka:9092 \&#10;--list&#10;&#10;# wrk 压测方案&#10;## 安装&#10;sudo apt update&#10;sudo apt install -y wrk&#10;&#10;## 执行压测&#10;wrk -t4 -c200 -d30s \&#10;-s scripts/seckill.lua \&#10;http://localhost:8080/seckill&#10;参数&#10;-t4&#10;4 个线程&#10;-c200&#10;200 个并发连接&#10;-d30s&#10;持续 30 秒&#10;&#10;&#10;## 指标&#9;目标&#10;QPS&#9;≥ 1000&#10;平均延迟&#9;&lt; 20ms&#10;P99 延迟&#9;&lt; 50ms&#10;错误率&#9;0%&#10;&#10;五、遇到的问题 &amp; 排查过程&#10;问题 1：Kafka 容器反复退出（Exit Code 137）&#10;现象&#10;docker ps -a | grep kafka&#10;# Exited (137) 5 minutes ago&#10;排查过程&#10;查看容器退出状态：&#10;docker inspect seckill_kafka --format='{{.State.OOMKilled}}'&#10;# 输出 true&#10;查看系统内存：&#10;free -m&#10;查看内核日志：&#10;dmesg -T | grep -i 'oom\|killed process'&#10;根因&#10;Kafka（Confluent Platform）默认 JVM 堆内存需求大&#10;云服务器内存不足（1~2GB）&#10;同时存在 MySQL + Redis + Kafka + ZooKeeper&#10;内存超限，被 Linux OOM Killer 强制终止&#10;解决方案&#10;限制 Kafka JVM 内存：&#10;environment:&#10;KAFKA_HEAP_OPTS: &quot;-Xms128M -Xmx384M&quot;&#10;KAFKA_JVM_PERFORMANCE_OPTS: &quot;-XX:MetaspaceSize=48m -XX:+UseG1GC&quot;&#10;限制 ZooKeeper 内存：&#10;environment:&#10;JVMFLAGS: &quot;-Xms64M -Xmx128M&quot;&#10;减少 Kafka 网络/IO 线程数：&#10;KAFKA_NUM_NETWORK_THREADS: 2&#10;KAFKA_NUM_IO_THREADS: 2&#10;问题 2：kafka-console-consumer 没有输出&#10;现象&#10;docker exec -it seckill_kafka kafka-console-consumer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order \&#10;--from-beginning&#10;# 无任何输出&#10;排查过程&#10;确认 Topic 是否存在：&#10;kafka-topics --list&#10;# 输出包含 seckill_order ✅&#10;查看 Consumer Group：&#10;kafka-consumer-groups --list&#10;# 发现 seckill-group 已存在&#10;查看 Kafka 日志：&#10;docker logs seckill_kafka --tail 50&#10;# 发现 seckill-group 已稳定消费&#10;根因&#10;Go 服务（seckill-group）已经消费完所有消息&#10;console-consumer 使用不同的 group.id，但消息已被消费且未保留&#10;Kafka 日志保留策略可能已清理旧消息&#10;解决方案&#10;使用 --from-beginning+ 新的 consumer group：&#10;kafka-console-consumer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order \&#10;--from-beginning \&#10;--group test-group-$(date +%s)&#10;验证 Kafka 可正常收发：&#10;# 生产者&#10;kafka-console-producer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order&#10;# 输入测试消息&#10;问题 3：docker exec 报错 &quot;container is not running&quot;&#10;现象&#10;Error response from daemon: container xxx is not running&#10;根因&#10;Kafka 容器已停止&#10;但历史日志仍存在，造成&quot;Kafka 还在运行&quot;的错觉&#10;解决方案&#10;检查容器状态：&#10;docker ps -a | grep kafka&#10;查看崩溃日志：&#10;docker logs seckill_kafka --tail 100&#10;重启服务：&#10;docker compose down&#10;docker compose up -d&#10;问题 4：Docker 容器名称冲突&#10;现象&#10;docker compose up&#10;# Error: Conflict. The container name &quot;seckill_kafka&quot; is already in use&#10;解决方案&#10;# 方式一：停止并删除旧容器&#10;docker compose down&#10;&#10;# 方式二：删除指定容器&#10;docker rm -f seckill_kafka&#10;六、服务运维 &amp; 二次部署&#10;6.1 查看各服务状态&#10;# 所有容器&#10;docker ps -a&#10;&#10;# 单独查看&#10;docker ps | grep kafka&#10;docker ps | grep redis&#10;docker ps | grep mysql&#10;docker ps | grep app&#10;6.2 完全重建（开发环境）&#10;cd /home/way/seckill&#10;sudo docker compose down -v       # 删除容器 + 数据卷&#10;sudo docker compose up -d --build # 重新构建启动&#10;⚠️ -v会清除 MySQL / Redis / Kafka 数据&#10;6.3 保留数据重建（推荐）&#10;sudo docker compose down         # 仅删除容器&#10;sudo docker compose up -d --build&#10;✅ MySQL 数据保留&#10;✅ Redis 数据保留&#10;✅ Kafka offset 保留&#10;6.4 单独更新后端服务（高频操作）&#10;# 仅重新构建 app 服务&#10;sudo docker compose build app&#10;&#10;# 仅重启 app 服务（不重启 MySQL / Redis / Kafka）&#10;sudo docker compose up -d --no-deps app&#10;✅ 零影响更新后端代码&#10;✅ 其他服务保持运行&#10;6.5 滚动更新（零停机）&#10;# 启动新版本（不停止旧版本）&#10;docker compose up -d --scale app=2 --no-recreate&#10;&#10;# 确认新版本正常后，停止旧版本&#10;docker stop seckill_app_old&#10;docker rm seckill_app_old&#10;&#10;# 恢复原配置&#10;docker compose up -d --scale app=1&#10;6.6 迁移到新机器&#10;# 原机器：打包项目&#10;cd /home/way&#10;tar czf seckill.tar.gz seckill/&#10;&#10;# 传输到新机器&#10;scp seckill.tar.gz user@new-host:/home/user/&#10;&#10;# 新机器：解压并启动&#10;cd /home/user&#10;tar xzf seckill.tar.gz&#10;cd seckill&#10;sudo docker compose up -d&#10;七、日常运维命令速查表&#10;7.1 Redis&#10;# 连接 Redis&#10;docker exec -it seckill_redis redis-cli&#10;&#10;# 查看队列长度&#10;LLEN seckill:order:queue&#10;&#10;# 查看库存&#10;GET stock:goods:1&#10;&#10;# 查看内存使用&#10;INFO memory&#10;7.2 MySQL&#10;# 连接 MySQL&#10;docker exec -it seckill_mysql mysql -uroot -proot123 seckill&#10;&#10;# 查看订单数&#10;SELECT COUNT(*) FROM orders;&#10;&#10;# 查看连接数&#10;SHOW STATUS LIKE 'Threads_connected';&#10;&#10;# 查看慢查询&#10;SHOW VARIABLES LIKE 'slow_query_log';&#10;7.3 Kafka&#10;# 查看 Topic 详情&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--describe --topic seckill_order&#10;&#10;# 查看 Consumer Group 消费进度&#10;docker exec -it seckill_kafka kafka-consumer-groups \&#10;--bootstrap-server kafka:9092 \&#10;--describe --group seckill-group&#10;&#10;# 查看 Broker 版本&#10;docker exec -it seckill_kafka kafka-broker-api-versions \&#10;--bootstrap-server kafka:9092&#10;7.4 Go 服务&#10;# 查看日志&#10;docker logs -f seckill_app --tail 100&#10;&#10;# 查看资源占用&#10;docker stats seckill_app&#10;&#10;# 进入容器调试&#10;docker exec -it seckill_app sh" />
+                  </map>
+                </option>
+                <option name="messageId" value="019f6de9ea7d7b16a83731377a3f3a13" />
+                <option name="model" value="deepseek-v3.1" />
+                <option name="protocol" value="ag-ui" />
+                <option name="question" value="整理下这个nw文档" />
+                <option name="rating" value="UNRATED" />
+                <option name="referenceBeans">
+                  <list />
+                </option>
+                <option name="requestAt" value="2026-07-17 10:31:14" />
+                <option name="status" value="SUCCESS" />
+                <option name="variables">
+                  <list />
+                </option>
+              </Turn>
+              <Turn>
+                <option name="agent" value="" />
+                <option name="aguiRpcList">
+                  <list>
+                    <option value="{&quot;type&quot;:&quot;RUN_STARTED&quot;,&quot;timestamp&quot;:1784255483,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f6dea0ca9746c80bd82d73dfac239&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;},&quot;threadId&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;runId&quot;:&quot;019f6dea0ca9746c80bd82d73dfac239&quot;}" />
+                    <option value="{&quot;type&quot;:&quot;RUN_ERROR&quot;,&quot;timestamp&quot;:1784255483,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f6dea0ca9746c80bd82d73dfac239&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;tip_option&quot;:{&quot;type&quot;:&quot;markdown&quot;,&quot;level&quot;:&quot;error&quot;,&quot;content&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}},&quot;message&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}" />
+                  </list>
+                </option>
+                <option name="answer" value="" />
+                <option name="chatMode" value="AGENT" />
+                <option name="codeReferences">
+                  <list>
+                    <CodeReferencesBean>
+                      <option name="content" value="" />
+                      <option name="filename" value="操作.md" />
+                      <option name="language" value="markdown" />
+                      <option name="range">
+                        <CommitRange>
+                          <option name="dontDisplayRange" value="true" />
+                          <option name="dontSelectByRange" value="true" />
+                          <option name="end">
+                            <Position />
+                          </option>
+                          <option name="start">
+                            <Position />
+                          </option>
+                        </CommitRange>
+                      </option>
+                      <option name="type" value="full_file" />
+                      <option name="url" value="file:///E:/myproject/seckill/操作.md" />
+                    </CodeReferencesBean>
+                  </list>
+                </option>
+                <option name="command" value="normal" />
+                <option name="conversationId" value="019f5a9c961d76d796bb61d9082659e4" />
+                <option name="historyDocumentMap">
+                  <map>
+                    <entry key="file:///E:/myproject/seckill/操作.md" value="# 数据流&#10;┌──────────────┐&#10;│   Client     │&#10;└──────┬───────┘&#10;│ HTTP&#10;┌──────▼───────┐&#10;│  Gin (Go)    │&#10;│  API Server  │&#10;└──┬────────┬──┘&#10;│        │&#10;LPUSH │        │ Producer&#10;│        ▼&#10;┌──────┴──┐  ┌──────────────┐&#10;│  Redis  │  │   Kafka      │&#10;│  Stock  │  │ seckill_order│&#10;└─────────┘  └──────┬───────┘&#10;│ Consumer Group&#10;│ (seckill-group)&#10;▼&#10;┌──────────────┐&#10;│  MySQL       │&#10;│  orders 表   │&#10;└──────────────┘&#10;&#10;# 启动方式&#10;## 构建并启动所有服务&#10;sudo docker compose up -d --build&#10;&#10;## 查看运行状态&#10;sudo docker ps&#10;&#10;## 查看日志&#10;sudo docker logs -f seckill_app&#10;&#10;# Kafka 配置与 Topic 管理&#10;&#10;## Topic 创建&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--create --topic seckill_order \&#10;--partitions 1 \&#10;--replication-factor 1&#10;&#10;## 查看 Topic 列表&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--list&#10;&#10;## Consumer Group&#10;docker exec -it seckill_kafka kafka-consumer-groups \&#10;--bootstrap-server kafka:9092 \&#10;--list&#10;&#10;# wrk 压测方案&#10;## 安装&#10;sudo apt update&#10;sudo apt install -y wrk&#10;&#10;## 执行压测&#10;wrk -t4 -c200 -d30s \&#10;-s scripts/seckill.lua \&#10;http://localhost:8080/seckill&#10;参数&#10;-t4&#10;4 个线程&#10;-c200&#10;200 个并发连接&#10;-d30s&#10;持续 30 秒&#10;&#10;&#10;## 指标&#9;目标&#10;QPS&#9;≥ 1000&#10;平均延迟&#9;&lt; 20ms&#10;P99 延迟&#9;&lt; 50ms&#10;错误率&#9;0%&#10;&#10;五、遇到的问题 &amp; 排查过程&#10;问题 1：Kafka 容器反复退出（Exit Code 137）&#10;现象&#10;docker ps -a | grep kafka&#10;# Exited (137) 5 minutes ago&#10;排查过程&#10;查看容器退出状态：&#10;docker inspect seckill_kafka --format='{{.State.OOMKilled}}'&#10;# 输出 true&#10;查看系统内存：&#10;free -m&#10;查看内核日志：&#10;dmesg -T | grep -i 'oom\|killed process'&#10;根因&#10;Kafka（Confluent Platform）默认 JVM 堆内存需求大&#10;云服务器内存不足（1~2GB）&#10;同时存在 MySQL + Redis + Kafka + ZooKeeper&#10;内存超限，被 Linux OOM Killer 强制终止&#10;解决方案&#10;限制 Kafka JVM 内存：&#10;environment:&#10;KAFKA_HEAP_OPTS: &quot;-Xms128M -Xmx384M&quot;&#10;KAFKA_JVM_PERFORMANCE_OPTS: &quot;-XX:MetaspaceSize=48m -XX:+UseG1GC&quot;&#10;限制 ZooKeeper 内存：&#10;environment:&#10;JVMFLAGS: &quot;-Xms64M -Xmx128M&quot;&#10;减少 Kafka 网络/IO 线程数：&#10;KAFKA_NUM_NETWORK_THREADS: 2&#10;KAFKA_NUM_IO_THREADS: 2&#10;问题 2：kafka-console-consumer 没有输出&#10;现象&#10;docker exec -it seckill_kafka kafka-console-consumer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order \&#10;--from-beginning&#10;# 无任何输出&#10;排查过程&#10;确认 Topic 是否存在：&#10;kafka-topics --list&#10;# 输出包含 seckill_order ✅&#10;查看 Consumer Group：&#10;kafka-consumer-groups --list&#10;# 发现 seckill-group 已存在&#10;查看 Kafka 日志：&#10;docker logs seckill_kafka --tail 50&#10;# 发现 seckill-group 已稳定消费&#10;根因&#10;Go 服务（seckill-group）已经消费完所有消息&#10;console-consumer 使用不同的 group.id，但消息已被消费且未保留&#10;Kafka 日志保留策略可能已清理旧消息&#10;解决方案&#10;使用 --from-beginning+ 新的 consumer group：&#10;kafka-console-consumer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order \&#10;--from-beginning \&#10;--group test-group-$(date +%s)&#10;验证 Kafka 可正常收发：&#10;# 生产者&#10;kafka-console-producer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order&#10;# 输入测试消息&#10;问题 3：docker exec 报错 &quot;container is not running&quot;&#10;现象&#10;Error response from daemon: container xxx is not running&#10;根因&#10;Kafka 容器已停止&#10;但历史日志仍存在，造成&quot;Kafka 还在运行&quot;的错觉&#10;解决方案&#10;检查容器状态：&#10;docker ps -a | grep kafka&#10;查看崩溃日志：&#10;docker logs seckill_kafka --tail 100&#10;重启服务：&#10;docker compose down&#10;docker compose up -d&#10;问题 4：Docker 容器名称冲突&#10;现象&#10;docker compose up&#10;# Error: Conflict. The container name &quot;seckill_kafka&quot; is already in use&#10;解决方案&#10;# 方式一：停止并删除旧容器&#10;docker compose down&#10;&#10;# 方式二：删除指定容器&#10;docker rm -f seckill_kafka&#10;六、服务运维 &amp; 二次部署&#10;6.1 查看各服务状态&#10;# 所有容器&#10;docker ps -a&#10;&#10;# 单独查看&#10;docker ps | grep kafka&#10;docker ps | grep redis&#10;docker ps | grep mysql&#10;docker ps | grep app&#10;6.2 完全重建（开发环境）&#10;cd /home/way/seckill&#10;sudo docker compose down -v       # 删除容器 + 数据卷&#10;sudo docker compose up -d --build # 重新构建启动&#10;⚠️ -v会清除 MySQL / Redis / Kafka 数据&#10;6.3 保留数据重建（推荐）&#10;sudo docker compose down         # 仅删除容器&#10;sudo docker compose up -d --build&#10;✅ MySQL 数据保留&#10;✅ Redis 数据保留&#10;✅ Kafka offset 保留&#10;6.4 单独更新后端服务（高频操作）&#10;# 仅重新构建 app 服务&#10;sudo docker compose build app&#10;&#10;# 仅重启 app 服务（不重启 MySQL / Redis / Kafka）&#10;sudo docker compose up -d --no-deps app&#10;✅ 零影响更新后端代码&#10;✅ 其他服务保持运行&#10;6.5 滚动更新（零停机）&#10;# 启动新版本（不停止旧版本）&#10;docker compose up -d --scale app=2 --no-recreate&#10;&#10;# 确认新版本正常后，停止旧版本&#10;docker stop seckill_app_old&#10;docker rm seckill_app_old&#10;&#10;# 恢复原配置&#10;docker compose up -d --scale app=1&#10;6.6 迁移到新机器&#10;# 原机器：打包项目&#10;cd /home/way&#10;tar czf seckill.tar.gz seckill/&#10;&#10;# 传输到新机器&#10;scp seckill.tar.gz user@new-host:/home/user/&#10;&#10;# 新机器：解压并启动&#10;cd /home/user&#10;tar xzf seckill.tar.gz&#10;cd seckill&#10;sudo docker compose up -d&#10;七、日常运维命令速查表&#10;7.1 Redis&#10;# 连接 Redis&#10;docker exec -it seckill_redis redis-cli&#10;&#10;# 查看队列长度&#10;LLEN seckill:order:queue&#10;&#10;# 查看库存&#10;GET stock:goods:1&#10;&#10;# 查看内存使用&#10;INFO memory&#10;7.2 MySQL&#10;# 连接 MySQL&#10;docker exec -it seckill_mysql mysql -uroot -proot123 seckill&#10;&#10;# 查看订单数&#10;SELECT COUNT(*) FROM orders;&#10;&#10;# 查看连接数&#10;SHOW STATUS LIKE 'Threads_connected';&#10;&#10;# 查看慢查询&#10;SHOW VARIABLES LIKE 'slow_query_log';&#10;7.3 Kafka&#10;# 查看 Topic 详情&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--describe --topic seckill_order&#10;&#10;# 查看 Consumer Group 消费进度&#10;docker exec -it seckill_kafka kafka-consumer-groups \&#10;--bootstrap-server kafka:9092 \&#10;--describe --group seckill-group&#10;&#10;# 查看 Broker 版本&#10;docker exec -it seckill_kafka kafka-broker-api-versions \&#10;--bootstrap-server kafka:9092&#10;7.4 Go 服务&#10;# 查看日志&#10;docker logs -f seckill_app --tail 100&#10;&#10;# 查看资源占用&#10;docker stats seckill_app&#10;&#10;# 进入容器调试&#10;docker exec -it seckill_app sh" />
+                  </map>
+                </option>
+                <option name="messageId" value="019f6dea0ca9746c80bd82d73dfac239" />
+                <option name="model" value="tokenhub_deepseek-v4-pro" />
+                <option name="protocol" value="ag-ui" />
+                <option name="question" value="整理下这个nw文档" />
+                <option name="rating" value="UNRATED" />
+                <option name="referenceBeans">
+                  <list />
+                </option>
+                <option name="requestAt" value="2026-07-17 10:31:23" />
+                <option name="status" value="SUCCESS" />
+                <option name="variables">
+                  <list />
+                </option>
+              </Turn>
+              <Turn>
+                <option name="agent" value="" />
+                <option name="aguiRpcList">
+                  <list>
+                    <option value="{&quot;type&quot;:&quot;RUN_STARTED&quot;,&quot;timestamp&quot;:1784255487,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f6dea1ed37bbb940683bc9d889df0&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;},&quot;threadId&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;runId&quot;:&quot;019f6dea1ed37bbb940683bc9d889df0&quot;}" />
+                    <option value="{&quot;type&quot;:&quot;RUN_ERROR&quot;,&quot;timestamp&quot;:1784255487,&quot;rawEvent&quot;:{&quot;message_id&quot;:&quot;019f6dea1ed37bbb940683bc9d889df0&quot;,&quot;conversation_id&quot;:&quot;019f5a9c961d76d796bb61d9082659e4&quot;,&quot;tip_option&quot;:{&quot;type&quot;:&quot;markdown&quot;,&quot;level&quot;:&quot;error&quot;,&quot;content&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}},&quot;message&quot;:&quot;你本月模型Token额度已用尽，可前往 [Token看板](https://tokens.woa.com/?product=codebuddy)  查看使用详情，或者参考 [提额说明](https://iwiki.woa.com/p/4018934302) 申请提额~&quot;}" />
+                  </list>
+                </option>
+                <option name="answer" value="" />
+                <option name="chatMode" value="AGENT" />
+                <option name="codeReferences">
+                  <list>
+                    <CodeReferencesBean>
+                      <option name="content" value="" />
+                      <option name="filename" value="操作.md" />
+                      <option name="language" value="markdown" />
+                      <option name="range">
+                        <CommitRange>
+                          <option name="dontDisplayRange" value="true" />
+                          <option name="dontSelectByRange" value="true" />
+                          <option name="end">
+                            <Position />
+                          </option>
+                          <option name="start">
+                            <Position />
+                          </option>
+                        </CommitRange>
+                      </option>
+                      <option name="type" value="full_file" />
+                      <option name="url" value="file:///E:/myproject/seckill/操作.md" />
+                    </CodeReferencesBean>
+                  </list>
+                </option>
+                <option name="command" value="normal" />
+                <option name="conversationId" value="019f5a9c961d76d796bb61d9082659e4" />
+                <option name="historyDocumentMap">
+                  <map>
+                    <entry key="file:///E:/myproject/seckill/操作.md" value="# 数据流&#10;┌──────────────┐&#10;│   Client     │&#10;└──────┬───────┘&#10;│ HTTP&#10;┌──────▼───────┐&#10;│  Gin (Go)    │&#10;│  API Server  │&#10;└──┬────────┬──┘&#10;│        │&#10;LPUSH │        │ Producer&#10;│        ▼&#10;┌──────┴──┐  ┌──────────────┐&#10;│  Redis  │  │   Kafka      │&#10;│  Stock  │  │ seckill_order│&#10;└─────────┘  └──────┬───────┘&#10;│ Consumer Group&#10;│ (seckill-group)&#10;▼&#10;┌──────────────┐&#10;│  MySQL       │&#10;│  orders 表   │&#10;└──────────────┘&#10;&#10;# 启动方式&#10;## 构建并启动所有服务&#10;sudo docker compose up -d --build&#10;&#10;## 查看运行状态&#10;sudo docker ps&#10;&#10;## 查看日志&#10;sudo docker logs -f seckill_app&#10;&#10;# Kafka 配置与 Topic 管理&#10;&#10;## Topic 创建&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--create --topic seckill_order \&#10;--partitions 1 \&#10;--replication-factor 1&#10;&#10;## 查看 Topic 列表&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--list&#10;&#10;## Consumer Group&#10;docker exec -it seckill_kafka kafka-consumer-groups \&#10;--bootstrap-server kafka:9092 \&#10;--list&#10;&#10;# wrk 压测方案&#10;## 安装&#10;sudo apt update&#10;sudo apt install -y wrk&#10;&#10;## 执行压测&#10;wrk -t4 -c200 -d30s \&#10;-s scripts/seckill.lua \&#10;http://localhost:8080/seckill&#10;参数&#10;-t4&#10;4 个线程&#10;-c200&#10;200 个并发连接&#10;-d30s&#10;持续 30 秒&#10;&#10;&#10;## 指标&#9;目标&#10;QPS&#9;≥ 1000&#10;平均延迟&#9;&lt; 20ms&#10;P99 延迟&#9;&lt; 50ms&#10;错误率&#9;0%&#10;&#10;五、遇到的问题 &amp; 排查过程&#10;问题 1：Kafka 容器反复退出（Exit Code 137）&#10;现象&#10;docker ps -a | grep kafka&#10;# Exited (137) 5 minutes ago&#10;排查过程&#10;查看容器退出状态：&#10;docker inspect seckill_kafka --format='{{.State.OOMKilled}}'&#10;# 输出 true&#10;查看系统内存：&#10;free -m&#10;查看内核日志：&#10;dmesg -T | grep -i 'oom\|killed process'&#10;根因&#10;Kafka（Confluent Platform）默认 JVM 堆内存需求大&#10;云服务器内存不足（1~2GB）&#10;同时存在 MySQL + Redis + Kafka + ZooKeeper&#10;内存超限，被 Linux OOM Killer 强制终止&#10;解决方案&#10;限制 Kafka JVM 内存：&#10;environment:&#10;KAFKA_HEAP_OPTS: &quot;-Xms128M -Xmx384M&quot;&#10;KAFKA_JVM_PERFORMANCE_OPTS: &quot;-XX:MetaspaceSize=48m -XX:+UseG1GC&quot;&#10;限制 ZooKeeper 内存：&#10;environment:&#10;JVMFLAGS: &quot;-Xms64M -Xmx128M&quot;&#10;减少 Kafka 网络/IO 线程数：&#10;KAFKA_NUM_NETWORK_THREADS: 2&#10;KAFKA_NUM_IO_THREADS: 2&#10;问题 2：kafka-console-consumer 没有输出&#10;现象&#10;docker exec -it seckill_kafka kafka-console-consumer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order \&#10;--from-beginning&#10;# 无任何输出&#10;排查过程&#10;确认 Topic 是否存在：&#10;kafka-topics --list&#10;# 输出包含 seckill_order ✅&#10;查看 Consumer Group：&#10;kafka-consumer-groups --list&#10;# 发现 seckill-group 已存在&#10;查看 Kafka 日志：&#10;docker logs seckill_kafka --tail 50&#10;# 发现 seckill-group 已稳定消费&#10;根因&#10;Go 服务（seckill-group）已经消费完所有消息&#10;console-consumer 使用不同的 group.id，但消息已被消费且未保留&#10;Kafka 日志保留策略可能已清理旧消息&#10;解决方案&#10;使用 --from-beginning+ 新的 consumer group：&#10;kafka-console-consumer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order \&#10;--from-beginning \&#10;--group test-group-$(date +%s)&#10;验证 Kafka 可正常收发：&#10;# 生产者&#10;kafka-console-producer \&#10;--bootstrap-server kafka:9092 \&#10;--topic seckill_order&#10;# 输入测试消息&#10;问题 3：docker exec 报错 &quot;container is not running&quot;&#10;现象&#10;Error response from daemon: container xxx is not running&#10;根因&#10;Kafka 容器已停止&#10;但历史日志仍存在，造成&quot;Kafka 还在运行&quot;的错觉&#10;解决方案&#10;检查容器状态：&#10;docker ps -a | grep kafka&#10;查看崩溃日志：&#10;docker logs seckill_kafka --tail 100&#10;重启服务：&#10;docker compose down&#10;docker compose up -d&#10;问题 4：Docker 容器名称冲突&#10;现象&#10;docker compose up&#10;# Error: Conflict. The container name &quot;seckill_kafka&quot; is already in use&#10;解决方案&#10;# 方式一：停止并删除旧容器&#10;docker compose down&#10;&#10;# 方式二：删除指定容器&#10;docker rm -f seckill_kafka&#10;六、服务运维 &amp; 二次部署&#10;6.1 查看各服务状态&#10;# 所有容器&#10;docker ps -a&#10;&#10;# 单独查看&#10;docker ps | grep kafka&#10;docker ps | grep redis&#10;docker ps | grep mysql&#10;docker ps | grep app&#10;6.2 完全重建（开发环境）&#10;cd /home/way/seckill&#10;sudo docker compose down -v       # 删除容器 + 数据卷&#10;sudo docker compose up -d --build # 重新构建启动&#10;⚠️ -v会清除 MySQL / Redis / Kafka 数据&#10;6.3 保留数据重建（推荐）&#10;sudo docker compose down         # 仅删除容器&#10;sudo docker compose up -d --build&#10;✅ MySQL 数据保留&#10;✅ Redis 数据保留&#10;✅ Kafka offset 保留&#10;6.4 单独更新后端服务（高频操作）&#10;# 仅重新构建 app 服务&#10;sudo docker compose build app&#10;&#10;# 仅重启 app 服务（不重启 MySQL / Redis / Kafka）&#10;sudo docker compose up -d --no-deps app&#10;✅ 零影响更新后端代码&#10;✅ 其他服务保持运行&#10;6.5 滚动更新（零停机）&#10;# 启动新版本（不停止旧版本）&#10;docker compose up -d --scale app=2 --no-recreate&#10;&#10;# 确认新版本正常后，停止旧版本&#10;docker stop seckill_app_old&#10;docker rm seckill_app_old&#10;&#10;# 恢复原配置&#10;docker compose up -d --scale app=1&#10;6.6 迁移到新机器&#10;# 原机器：打包项目&#10;cd /home/way&#10;tar czf seckill.tar.gz seckill/&#10;&#10;# 传输到新机器&#10;scp seckill.tar.gz user@new-host:/home/user/&#10;&#10;# 新机器：解压并启动&#10;cd /home/user&#10;tar xzf seckill.tar.gz&#10;cd seckill&#10;sudo docker compose up -d&#10;七、日常运维命令速查表&#10;7.1 Redis&#10;# 连接 Redis&#10;docker exec -it seckill_redis redis-cli&#10;&#10;# 查看队列长度&#10;LLEN seckill:order:queue&#10;&#10;# 查看库存&#10;GET stock:goods:1&#10;&#10;# 查看内存使用&#10;INFO memory&#10;7.2 MySQL&#10;# 连接 MySQL&#10;docker exec -it seckill_mysql mysql -uroot -proot123 seckill&#10;&#10;# 查看订单数&#10;SELECT COUNT(*) FROM orders;&#10;&#10;# 查看连接数&#10;SHOW STATUS LIKE 'Threads_connected';&#10;&#10;# 查看慢查询&#10;SHOW VARIABLES LIKE 'slow_query_log';&#10;7.3 Kafka&#10;# 查看 Topic 详情&#10;docker exec -it seckill_kafka kafka-topics \&#10;--bootstrap-server kafka:9092 \&#10;--describe --topic seckill_order&#10;&#10;# 查看 Consumer Group 消费进度&#10;docker exec -it seckill_kafka kafka-consumer-groups \&#10;--bootstrap-server kafka:9092 \&#10;--describe --group seckill-group&#10;&#10;# 查看 Broker 版本&#10;docker exec -it seckill_kafka kafka-broker-api-versions \&#10;--bootstrap-server kafka:9092&#10;7.4 Go 服务&#10;# 查看日志&#10;docker logs -f seckill_app --tail 100&#10;&#10;# 查看资源占用&#10;docker stats seckill_app&#10;&#10;# 进入容器调试&#10;docker exec -it seckill_app sh" />
+                  </map>
+                </option>
+                <option name="messageId" value="019f6dea1ed37bbb940683bc9d889df0" />
+                <option name="model" value="kimi-k2.7-code" />
+                <option name="protocol" value="ag-ui" />
+                <option name="question" value="整理下这个nw文档" />
+                <option name="rating" value="UNRATED" />
+                <option name="referenceBeans">
+                  <list />
+                </option>
+                <option name="requestAt" value="2026-07-17 10:31:27" />
+                <option name="status" value="SUCCESS" />
+                <option name="variables">
+                  <list />
+                </option>
+              </Turn>
             </list>
           </option>
-          <option name="updateTime" value="1784096898269" />
+          <option name="updateTime" value="1784255487973" />
         </Conversation>
       </list>
     </option>
