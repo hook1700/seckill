@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"runtime"
+
 	"seckill/internal/config"
-	"seckill/internal/mq"
 	"seckill/internal/repo"
+	"seckill/internal/worker"
 
 	"seckill/internal/api"
 )
@@ -20,11 +20,10 @@ func main() {
 
 	repo.InitRedis(cfg.Redis.Addr, cfg.Redis.PoolSize)
 	repo.InitMySQL(cfg.MySQL.DSN, cfg.MySQL.MaxOpenConns, cfg.MySQL.MaxIdleConns)
-	repo.InitKafka(cfg.Kafka.Brokers)
 
-	go mq.StartConsumer(cfg.Kafka.Brokers, cfg.Kafka.Topic, cfg.Kafka.ConsumerGroup)
+	go worker.StartOrderWorker("1")
 
 	r := api.RegisterRouter()
 	log.Printf("seckill server start at :%d", cfg.App.Port)
-	log.Fatal(r.Run(fmt.Sprintf(":%d", cfg.App.Port)))
+	log.Fatal(r.Run(":8080"))
 }

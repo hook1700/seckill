@@ -1,6 +1,8 @@
--- KEYS[1] = stock_key
--- KEYS[2] = user_set_key
--- ARGV[1] = user_id
+-- KEYS[1]: stockKey
+-- KEYS[2]: userSetKey
+-- KEYS[3]: orderQueueKey
+-- ARGV[1]: userId
+-- ARGV[2]: orderId
 
 local stock = tonumber(redis.call("GET", KEYS[1]))
 if not stock or stock <= 0 then
@@ -13,4 +15,6 @@ end
 
 redis.call("DECR", KEYS[1])
 redis.call("SADD", KEYS[2], ARGV[1])
+redis.call("LPUSH", KEYS[3], ARGV[1] .. ":" .. ARGV[2])
+
 return 1

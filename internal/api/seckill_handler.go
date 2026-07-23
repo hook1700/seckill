@@ -1,7 +1,6 @@
 package api
 
 import (
-	"net/http"
 	"seckill/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -11,19 +10,14 @@ func SeckillHandler(c *gin.Context) {
 	userID := c.Query("user_id")
 	activityID := c.Query("activity_id")
 
-	if userID == "" || activityID == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid params"})
-		return
-	}
-
-	if err := service.DoSeckill(c.Request.Context(), userID, activityID); err != nil {
+	orderID, err := service.DoSeckill(c.Request.Context(), userID, activityID)
+	if err != nil {
 		if err == service.ErrSoldOut {
-			c.JSON(http.StatusOK, gin.H{"msg": "sold out"})
+			c.JSON(200, gin.H{"msg": "sold out"})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal error"})
+			c.JSON(500, gin.H{"error": "internal"})
 		}
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"msg": "queued"})
+	c.JSON(200, gin.H{"msg": "queued", "order_id": orderID})
 }

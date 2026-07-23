@@ -17,40 +17,62 @@ func InitRedis(addr string, poolSize int) {
 		MinIdleConns: poolSize / 4,
 		DialTimeout:  2 * time.Second,
 	})
-
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		panic(fmt.Sprintf("redis connect failed: %v", err))
 	}
 }
 
-const seckillLua = `
+var seckillScript = redis.NewScript(`
 local stock = tonumber(redis.call("GET", KEYS[1]))
-if not stock or stock <= 0 then return -1 end
-if redis.call("SISMEMBER", KEYS[2], ARGV[1]) == 1 then return -2 end
+if not stock or stock <= 0 then
+    return -1
+end
+if redis.call("SISMEMBER", KEYS[2], ARGV[1]) == 1 then
+    return -2
+end
 redis.call("DECR", KEYS[1])
 redis.call("SADD", KEYS[2], ARGV[1])
+redis.call("LPUSH", KEYS[3], ARGV[1] .. ":" .. ARGV[2])
 return 1
-`
+`)
 
-var seckillScript = redis.NewScript(seckillLua)
-
-func SeckillDecr(ctx context.Context, userID, activityID string) (bool, error) {
+func Seckill(ctx context.Context, userID, activityID, orderID string) (int64, error) {
 	stockKey := "seckill:stock:" + activityID
 	userKey := "seckill:users:" + activityID
+	queueKey := "seckill:orders:" + activityID
 
-	res, err := seckillScript.Run(ctx, rdb, []string{stockKey, userKey}, userID).Int64()
+	res, err := seckillScript.Run(
+		ctx,
+		rdb,
+		[]string{stockKey, userKey, queueKey},
+		userID, orderID,
+	).Int64()
+
 	if err != nil {
-		return false, err
+		return 0, err
 	}
-	switch res {
-	case 1:
-		return true, nil
-	case -1, -2:
-		return false, nil
-	default:
-		return false, fmt.Errorf("unexpected lua result: %d", res)
+	return res, nil
+}
+
+func PopOrder(ctx context.Context, activityID string) (userID, orderID string, ok bool) {
+	res, err := rdb.BRPop(ctx, 5*time.Second, "seckill:orders:"+activityID).Result()
+	if err != nil || len(res) < 2 {
+		return "", "", false
 	}
+	parts := splitOrderMsg(res[1])
+	if len(parts) != 2 {
+		return "", "", false
+	}
+	return parts[0], parts[1], true
+}
+
+func splitOrderMsg(msg string) []string {
+	for i := len(msg) - 1; i >= 0; i-- {
+		if msg[i] == ':' {
+			return []string{msg[:i], msg[i+1:]}
+		}
+	}
+	return nil
 }

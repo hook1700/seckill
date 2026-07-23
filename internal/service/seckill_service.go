@@ -3,20 +3,25 @@ package service
 import (
 	"context"
 	"errors"
-	"seckill/internal/repo"
+	repo "seckill/internal/repo"
+
+	"github.com/google/uuid"
 )
 
-var (
-	ErrSoldOut = errors.New("sold out")
-)
+var ErrSoldOut = errors.New("sold out")
 
-func DoSeckill(ctx context.Context, userID, activityID string) error {
-	success, err := repo.SeckillDecr(ctx, userID, activityID)
+func DoSeckill(ctx context.Context, userID, activityID string) (string, error) {
+	orderID := uuid.NewString()
+	res, err := repo.Seckill(ctx, userID, activityID, orderID)
 	if err != nil {
-		return err
+		return "", err
 	}
-	if !success {
-		return ErrSoldOut
+	switch res {
+	case repo.SeckillOK:
+		return orderID, nil
+	case repo.SeckillSoldOut, repo.SeckillRepeated:
+		return "", ErrSoldOut
+	default:
+		return "", errors.New("unknown error")
 	}
-	return repo.SendOrderEvent(ctx, userID, activityID)
 }
