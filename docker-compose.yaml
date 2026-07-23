@@ -5,7 +5,7 @@ services:
     image: redis:7-alpine
     container_name: seckill_redis
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -17,13 +17,15 @@ services:
       MYSQL_ROOT_PASSWORD: root123
       MYSQL_DATABASE: seckill
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123" ]
       interval: 5s
       timeout: 3s
       retries: 10
       start_period: 10s
 
   app:
+    ports:
+      - "8080:8080"
     build: .
     container_name: seckill_app
     depends_on:
