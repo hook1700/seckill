@@ -4,12 +4,13 @@ services:
   redis:
     image: redis:7-alpine
     container_name: seckill_redis
+    expose:
+      - "6379"
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
-
   mysql:
     image: mysql:8.0
     container_name: seckill_mysql
@@ -22,6 +23,10 @@ services:
       timeout: 3s
       retries: 10
       start_period: 10s
+    volumes:
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
 
   app:
     ports:
