@@ -4,8 +4,11 @@ services:
   redis:
     image: redis:7-alpine
     container_name: seckill_redis
-    command: redis-server --appendonly yes
-    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   mysql:
     image: mysql:8.0
@@ -13,16 +16,18 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root123
       MYSQL_DATABASE: seckill
-    volumes:
-      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
-    ports: ["3306:3306"]
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot123"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
 
   app:
     build: .
     container_name: seckill_app
-    depends_on: [redis, mysql]
-    environment:
-      GOMAXPROCS: 1
-      REDIS_ADDR: redis:6379
-      MYSQL_DSN: root:root123@tcp(mysql:3306)/seckill?charset=utf8mb4&parseTime=true
-    ports: ["8080:8080"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
