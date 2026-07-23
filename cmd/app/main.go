@@ -23,12 +23,13 @@ func main() {
 		runtime.GOMAXPROCS(cfg.App.GOMAXPROCS)
 	}
 
+	waitForMySQL(cfg.MySQL.DSN, 30)
+	waitForRedis(cfg.Redis.Addr, 30)
+
 	repo.InitRedis(cfg.Redis.Addr, cfg.Redis.PoolSize)
 	repo.InitMySQL(cfg.MySQL.DSN, cfg.MySQL.MaxOpenConns, cfg.MySQL.MaxIdleConns)
 
 	go worker.StartOrderWorker("1")
-	waitForMySQL(cfg.MySQL.DSN, 30)
-	waitForRedis(cfg.Redis.Addr, 30)
 
 	r := api.RegisterRouter()
 	log.Printf("seckill server start at :%d", cfg.App.Port)
