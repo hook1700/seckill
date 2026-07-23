@@ -8,6 +8,11 @@ type Order struct {
 	Status     int8   `gorm:"default:1"`
 }
 
+// ✅ 关键：显式指定表名
+func (Order) TableName() string {
+	return "seckill_order"
+}
+
 const (
 	SeckillOK       = 1
 	SeckillSoldOut  = -1
