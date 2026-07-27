@@ -4,17 +4,20 @@
 -- ARGV[1]: userId
 -- ARGV[2]: orderId
 
-local stock = tonumber(redis.call("GET", KEYS[1]))
-if not stock or stock <= 0 then
-    return -1
+counter = 0
+thread_id = 0
+
+setup = function(thread)
+    thread_id = thread_id + 1
 end
 
-if redis.call("SISMEMBER", KEYS[2], ARGV[1]) == 1 then
-    return -2
+request = function()
+    counter = counter + 1
+    local user_id = string.format(
+        "%d_%d_%d",
+        thread_id,
+        os.clock() * 1000000,
+        counter
+    )
+    return wrk.format("GET", "/seckill?user_id=" .. user_id .. "&activity_id=1")
 end
-
-redis.call("DECR", KEYS[1])
-redis.call("SADD", KEYS[2], ARGV[1])
-redis.call("LPUSH", KEYS[3], ARGV[1] .. ":" .. ARGV[2])
-
-return 1
