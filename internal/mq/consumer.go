@@ -54,8 +54,8 @@ func StartConsumer(brokers, topic, groupID string) {
 
 		userID, _ := strconv.ParseInt(event.UserID, 10, 64)
 		activityID, _ := strconv.ParseInt(event.ActivityID, 10, 64)
-
-		if err := repo.SaveOrder(userID, activityID); err != nil {
+		//todo order id 补充
+		if err := repo.SaveOrder(userID, activityID, ""); err != nil {
 			log.Printf("❌ save order failed: %v", err)
 		} else {
 			log.Printf("✅ order saved: user=%s activity=%s", event.UserID, event.ActivityID)
